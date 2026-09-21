@@ -18,9 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unscramblee.ui.theme.UnscrambleeTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,30 +38,17 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GameScreen() {
 
-    var userAnswer by remember {
-        mutableStateOf("")
-    }
+    // Get the ViewModel
+    val viewModel: GameViewModel = viewModel()
 
-    val words = listOf(
-        "CAT",
-        "DOG",
-        "BOOK"
-    )
-
-    var currentWordIndex by remember {
-        mutableStateOf(0)
-    }
-
-    val correctAnswer = words[currentWordIndex]
-
+    // Scrambled word is still kept here temporarily
     var scrambledWord by remember {
         mutableStateOf(
-            words[0].toList().shuffled().joinToString("")
+            viewModel.words[viewModel.currentWordIndex]
+                .toList()
+                .shuffled()
+                .joinToString("")
         )
-    }
-
-    var score by remember {
-        mutableStateOf(0)
     }
 
     Column(
@@ -83,9 +72,9 @@ fun GameScreen() {
         )
 
         OutlinedTextField(
-            value = userAnswer,
+            value = viewModel.userAnswer,
             onValueChange = {
-                userAnswer = it
+                viewModel.userAnswer = it
             },
             label = {
                 Text("Enter your answer")
@@ -94,14 +83,18 @@ fun GameScreen() {
 
         Button(
             onClick = {
-                if (userAnswer == correctAnswer) {
-                    score++
 
-                    if (currentWordIndex < words.size - 1) {
-                        currentWordIndex++
-                        userAnswer = ""
+                if (viewModel.userAnswer == viewModel.words[viewModel.currentWordIndex]) {
 
-                        scrambledWord = words[currentWordIndex]
+                    viewModel.score++
+
+                    if (viewModel.currentWordIndex < viewModel.words.size - 1) {
+
+                        viewModel.currentWordIndex++
+
+                        viewModel.userAnswer = ""
+
+                        scrambledWord = viewModel.words[viewModel.currentWordIndex]
                             .toList()
                             .shuffled()
                             .joinToString("")
@@ -113,7 +106,7 @@ fun GameScreen() {
         }
 
         Text(
-            text = "Score: $score"
+            text = "Score: ${viewModel.score}"
         )
     }
 }
