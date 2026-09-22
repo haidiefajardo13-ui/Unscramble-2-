@@ -1,14 +1,27 @@
 package com.example.unscramblee
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class GameViewModel : ViewModel() {
-    val words: List<String> = listOf("CAT", "DOG", "BOOK")
-    
-    var currentWordIndex by mutableStateOf(0)
-    var score by mutableStateOf(0)
-    var userAnswer by mutableStateOf("")
+
+    val words: List<String> = listOf(
+        "CAT",
+        "DOG",
+        "BOOK"
+    )
+
+    private val _uiState = MutableStateFlow(
+        GameUiState(
+            scrambledWord = words[0]
+                .toList()
+                .shuffled()
+                .joinToString("")
+        )
+    )
+
+    val uiState: StateFlow<GameUiState> =
+        _uiState.asStateFlow()
 }
